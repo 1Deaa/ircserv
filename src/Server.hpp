@@ -13,6 +13,8 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+# define CRLF "\r\n"
+
 # include <iostream>
 # include <vector>
 # include <sys/socket.h>
@@ -23,6 +25,8 @@
 # include <arpa/inet.h>
 # include <poll.h>
 # include <signal.h>
+# include <cstring>
+# include <algorithm>
 # include "Client.hpp"
 # include "Socket.hpp"
 
@@ -34,14 +38,21 @@ class Server
 		std::string				_password;
 		Socket*					_selfSocket;
 		std::vector<Socket*>	_sockets;
+		std::vector<Socket*>	_disconnected;
 		void	selfSocket(void);
 		void	acceptClient(void);
 		void	receiveData(Client*);
+		void	sendData(Client*);
+		void	markDisconnected(Client*);
+		void	disconnectSocket(Socket *);
+		void	processBuffer(Client*);
+		void	executeCommand(Client*, const std::string &);
 	public:
-		Server(int port, std::string password);
+		Server(int, const std::string &);
 		~Server();
 		void		run(void);
-		static void	signalHandler(int signum);
+		static void	printError(const std::string &);
+		static void	signalHandler(int);
 };
 
 #endif

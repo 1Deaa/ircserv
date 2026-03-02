@@ -35,20 +35,21 @@ class Socket
 	public:
 		Socket(fd_t, SocketType);
 		virtual ~Socket();
-		SocketType	getType(void) const;
-		fd_t		getFd(void) const;
-		short		getEvents(void) const;
-		short		getRevents(void) const;
-		pollfd		&getPollFd(void);
-		void		setEvents(short);
-		void		setRevents(short);
-		void		setFd(fd_t);
-		void		closeFd(void);
-		void		addEvent(short);
-		void		removeEvent(short);
-		bool		hasRevent(short) const;
-		static void	setNonBlocking(Socket *);
-		static void	setNonBlocking(fd_t);
+		SocketType		getType(void) const;
+		fd_t			getFd(void) const;
+		short			getEvents(void) const;
+		short			getRevents(void) const;
+		pollfd			&getPollFd(void);
+		void			setEvents(short);
+		void			setRevents(short);
+		void			setFd(fd_t);
+		void			closeFd(void);
+		void			addEvent(short);
+		void			removeEvent(short);
+		bool			hasRevent(short) const;
+		static void		setNonBlocking(Socket *);
+		static void		setNonBlocking(fd_t);
+		virtual void	updatePollEvents(void);
 };
 
 #endif

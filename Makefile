@@ -15,18 +15,18 @@ NAME=ircserv
 CXX=c++
 CXXFLAGS=-Wall -Wextra -Werror -std=c++98
 
-SRC=main.cpp
-SOURCES=$(addprefix src/, $(SRC))
+SRC=main.cpp \
+	Server.cpp Client.cpp \
+	Socket.cpp
 
-# INC=
-# INCLUDES=$(addprefix -I src/, $(INC))
+SOURCES=$(addprefix src/, $(SRC))
 
 OBJ=$(SOURCES:.cpp=.o)
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME) -I src/
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

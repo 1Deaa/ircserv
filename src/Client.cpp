@@ -24,3 +24,21 @@ const std::string	&Client::getIPAddress(void) const
 {
 	return (_ipAddress);
 }
+
+std::string	&Client::getReadBuffer(void)
+{
+	return (_readBuffer);
+}
+
+std::string	&Client::getWriteBuffer(void)
+{
+	return (_writeBuffer);
+}
+
+void	Client::updatePollEvents(void)
+{
+	if (!_writeBuffer.empty())
+		this->addEvent(POLLOUT);
+	else
+		this->removeEvent(POLLOUT);
+}

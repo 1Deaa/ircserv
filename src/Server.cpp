@@ -12,9 +12,21 @@
 
 #include "Server.hpp"
 
-Server::Server(int port, std::string password): _port(port), _password(password)
+void	Server::printError(const std::string &msg)
 {
+	std::cerr << "ircserv: " << msg << std::endl;
+}
 
+Server::Server(int port, const std::string &password): _port(port), _password(password)
+{
+}
+
+bool	Server::_signal = false;
+void	Server::signalHandler(int signo)
+{
+	(void)signo;
+	std::cout << std::endl << "Signal Received!" << std::endl;
+	Server::_signal = true;
 }
 
 Server::~Server()
@@ -56,7 +68,7 @@ void	Server::run()
 	selfSocket();
 
 	std::cout << "Server Listening <" << _selfSocket->getFd() << "> Started" << std::endl;
-	std::cout << "Waiting to accept client connection...\n";
+	std::cout << "Waiting for client connection...\n";
 
 	while (!Server::_signal)
 	{
@@ -64,9 +76,12 @@ void	Server::run()
 		pfds.reserve(_sockets.size());
 
 		for (std::size_t i = 0; i < _sockets.size(); i++)
+		{
+			_sockets[i]->updatePollEvents();
 			pfds.push_back(_sockets[i]->getPollFd());
+		}
 
-		if (0 >= poll(pfds.data(), pfds.size(), -1));
+		if (0 >= poll(pfds.data(), pfds.size(), -1))
 			continue ;
 														 //     |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
 		for (std::size_t i = 0; i < _sockets.size(); i++)//     | Propagate Revents |
@@ -79,19 +94,109 @@ void	Server::run()
 			if (!sock->getRevents())
 				continue ;
 			if (sock->hasRevent(POLLIN))
-			{
-				switch (sock->getType())
-				{
+			{							//      |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+				switch (sock->getType())// <--- | Switch Behaviour |
+				{						//      |__________________|
 					case (SERVER):
 						acceptClient();
 						break ;
 					case (CLIENT):
-						receiveData(dynamic_cast<Client*>(sock));
+						receiveData(static_cast<Client*>(sock));
 						break ;
 				}
 			}
+			if (sock->hasRevent(POLLOUT) && sock->getType() == CLIENT)
+			{
+				sendData(static_cast<Client*>(sock));
+			}
+		}							//      |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|
+		if (!_disconnected.empty()) // <--- | Disconnect Clients |
+		{							//      |____________________|
+			for (std::size_t i = 0; i < _disconnected.size(); i++)
+			{
+				std::cout << "Client <" << _disconnected[i]->getFd() << "> disconnected!" << std::endl;
+				disconnectSocket(_disconnected[i]);
+			}
+			_disconnected.clear();
 		}
 	}
+}
+
+void	Server::executeCommand(Client *client, const std::string &cmd)
+{
+	if (cmd == "Ping")
+	{
+		std::string reply;
+		reply = "Pong";
+		reply += CRLF;
+		client->getWriteBuffer().append(reply);
+	}
+	else
+	{
+		std::string reply;
+		reply = "Unknown Command";
+		reply += CRLF;
+		client->getWriteBuffer().append(reply);
+	}
+}
+
+void	Server::processBuffer(Client *client)
+{
+	std::size_t	pos;
+	std::string	&buffer = client->getReadBuffer();
+
+	while ((pos = buffer.find(CRLF)) != std::string::npos)
+	{
+		std::string	cmd = buffer.substr(0, pos);
+		buffer.erase(0, pos + 2);
+		executeCommand(client, cmd);
+	}
+}
+
+void	Server::receiveData(Client *client)
+{
+	char	buff[1024];
+
+	std::memset(buff, 0, sizeof(buff));
+	ssize_t bytes = recv(client->getFd(), buff, sizeof(buff) - 1, 0);
+	if (bytes <= 0)
+	{
+		markDisconnected(client);
+		return ;
+	}
+	std::string		&buffer = client->getReadBuffer();
+	buffer.append(buff, bytes);
+	processBuffer(client);
+}
+
+void	Server::sendData(Client *client)
+{
+	std::string	&buffer = client->getWriteBuffer();
+
+	if (buffer.empty())
+		return ;
+
+	ssize_t	sent = send(client->getFd(), buffer.data(), buffer.size(), 0);
+
+	if (sent > 0)
+	{
+		buffer.erase(0, sent);
+	}
+	else
+	{
+		markDisconnected(client);
+	}
+}
+
+void	Server::disconnectSocket(Socket *socket)
+{
+	_sockets.erase(std::remove(_sockets.begin(), _sockets.end(), socket), _sockets.end());
+	delete (socket);
+}
+
+void	Server::markDisconnected(Client *client)
+{
+	_disconnected.push_back(client);
 }
 
 void	Server::acceptClient(void)
@@ -102,14 +207,14 @@ void	Server::acceptClient(void)
 	int	clFd = accept(_selfSocket->getFd(), (sockaddr*)&addr, &len);
 	if (-1 == clFd)
 	{
-		std::cerr << "failed while invoking accept()." << std::endl;
+		Server::printError("failed while invoking accept().");
 		return ;
 	}
 	if (-1 == fcntl(clFd, F_SETFL, O_NONBLOCK))
 	{
-		std::cerr << "failed while invoking fcntl()." << std::endl;
+		Server::printError("failed while invoking fcntl().");
 		close(clFd);
-		return ; 
+		return ;
 	}
 
 	Client	*client = new Client(clFd);
@@ -118,5 +223,5 @@ void	Server::acceptClient(void)
 	client->setIPAddress(inet_ntoa(addr.sin_addr));
 	_sockets.push_back(client);
 
-	std::cout << "Client <" << client->getFd() << "> connected!" << std::endl;
+	std::cout << "Client <" << client->getFd() << "> IP: " << client->getIPAddress() << " connected!" << std::endl;
 }

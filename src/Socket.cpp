@@ -48,3 +48,8 @@ void	Socket::setNonBlocking(Socket *sock)
 {
 	setNonBlocking(sock->getFd());
 }
+
+void	Socket::updatePollEvents(void)
+{
+
+}

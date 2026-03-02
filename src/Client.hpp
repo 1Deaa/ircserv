@@ -25,6 +25,9 @@ class Client : public Socket
 		Client(fd_t fd);
 		void				setIPAddress(const std::string &);
 		const std::string	&getIPAddress(void) const;
+		std::string			&getReadBuffer(void);
+		std::string			&getWriteBuffer(void);
+		void				updatePollEvents(void);
 		~Client();
 };
 
