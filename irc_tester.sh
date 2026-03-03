@@ -9,6 +9,15 @@ CYAN="\033[1;36m"
 RESET="\033[0m"
 
 # ==================================================
+# Ctrl-C handler
+# ==================================================
+cleanup() {
+    echo -e "\n${RED}Stopped by user. Exiting...${RESET}"
+    exit 0
+}
+trap cleanup INT
+
+# ==================================================
 # Usage
 # ==================================================
 usage() {
@@ -42,15 +51,11 @@ fi
 HOST="$1"
 PORT="$2"
 
-# validate port number
 if ! [[ "$PORT" =~ ^[0-9]+$ ]] || (( PORT < 1 || PORT > 65535 )); then
     echo -e "${RED}Error: invalid port '$PORT'${RESET}"
     exit 1
 fi
 
-# ==================================================
-# Helpers
-# ==================================================
 print_test() {
     echo -e "\n${CYAN}=== Testing: $1 ===${RESET}"
 }
@@ -60,9 +65,8 @@ ok() {
 }
 
 # ==================================================
-# Tests
+# Tests (unchanged)
 # ==================================================
-
 test_no_crlf_overflow() {
     print_test "no CRLF overflow (20KB raw stream)"
 
@@ -90,13 +94,11 @@ test_split_large_line() {
 test_many_big_commands() {
     print_test "50 concurrent oversized commands (>512)"
 
-    # first one visible
     python3 - <<EOF | nc -q 0 "$HOST" "$PORT" &
 import sys
 sys.stdout.write("A"*600 + "\r\n")
 EOF
 
-    # others silent
     for i in {2..50}; do
       python3 - <<EOF | nc -q 0 "$HOST" "$PORT" >/dev/null 2>&1 &
 import sys
@@ -111,10 +113,8 @@ EOF
 test_normal_clients() {
     print_test "15 normal clients (Ping)"
 
-    # first visible
     (printf "Ping\r\n") | nc -q 0 "$HOST" "$PORT" &
 
-    # others silent
     for i in {2..15}; do
       (printf "Ping\r\n") | nc -q 0 "$HOST" "$PORT" >/dev/null 2>&1 &
     done
@@ -124,15 +124,23 @@ test_normal_clients() {
 }
 
 # ==================================================
-# Run
+# Run continuously
 # ==================================================
 echo -e "${CYAN}IRC Server Stress Tester${RESET}"
 echo "Target: $HOST:$PORT"
+echo "Press CTRL-C to stop"
 
 check_server
-test_no_crlf_overflow
-test_split_large_line
-test_many_big_commands
-test_normal_clients
 
-echo -e "\n${GREEN}All tests finished ✔${RESET}"
+ITER=1
+while true; do
+    echo -e "\n${CYAN}===== Loop $ITER =====${RESET}"
+
+    test_no_crlf_overflow
+    test_split_large_line
+    test_many_big_commands
+    test_normal_clients
+
+    ((ITER++))
+    sleep 1   # small pause so it doesn't hammer 100% CPU
+done
