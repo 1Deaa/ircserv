@@ -15,13 +15,20 @@
 
 #include "Socket.hpp"
 
+enum CLIENT_STATE
+{
+	RUNNING,
+	CLOSING,
+	DISCONN
+};
+
 class Client : public Socket
 {
 	private:
-		std::string	_writeBuffer;
-		std::string	_readBuffer;
-		std::string	_ipAddress;
-		bool		_closing;
+		std::string		_writeBuffer;
+		std::string		_readBuffer;
+		std::string		_ipAddress;
+		CLIENT_STATE	_state;
 	public:
 		Client(fd_t fd);
 		void				setIPAddress(const std::string &);
@@ -30,8 +37,8 @@ class Client : public Socket
 		std::string			&getWriteBuffer(void);
 		void				updatePollEvents(void);
 		void				queueWrite(std::string);
-		void				setClosing(bool);
-		bool				closingStatus(void);
+		void				setState(CLIENT_STATE);
+		const CLIENT_STATE	&getState(void) const;
 		~Client();
 };
 

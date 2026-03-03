@@ -12,7 +12,7 @@
 
 #include "Client.hpp"
 
-Client::Client(fd_t fd) : Socket(fd, CLIENT), _closing(false) {}
+Client::Client(fd_t fd) : Socket(fd, CLIENT), _state(RUNNING) {}
 Client::~Client() {}
 
 void	Client::setIPAddress(const std::string &ip)
@@ -49,12 +49,12 @@ void	Client::queueWrite(std::string str)
 	_writeBuffer.append(str);
 }
 
-void	Client::setClosing(bool val)
+void	Client::setState(CLIENT_STATE val)
 {
-	_closing = val;
+	_state = val;
 }
 
-bool	Client::closingStatus(void)
+const CLIENT_STATE	&Client::getState(void) const
 {
-	return (_closing);
+	return (_state);
 }

@@ -166,7 +166,7 @@ void	Server::processBuffer(Client *client)
 
 void	Server::receiveData(Client *client)
 {
-	if (client->closingStatus())
+	if (CLOSING == client->getState())
 		return ;
 	char	buff[4096];
 
@@ -191,7 +191,7 @@ void	Server::sendData(Client *client)
 	if (sent > 0)
 	{
 		buffer.erase(0, sent);
-		if (buffer.empty() && client->closingStatus())
+		if (buffer.empty() && client->getState() == CLOSING)
 			markDisconnected(client);
 	}
 	else
@@ -210,7 +210,10 @@ void	Server::markDisconnected(Client *client)
 {
 	std::vector<Socket*>::iterator	it = std::find(_disconnected.begin(), _disconnected.end(), client);
 	if (it == _disconnected.end())
+	{
+		client->setState(DISCONN);
 		_disconnected.push_back(client);
+	}
 }
 
 void	Server::acceptClient(void)
@@ -242,6 +245,6 @@ void	Server::acceptClient(void)
 
 void	Server::markClosing(Client *client)
 {
-	client->setClosing(true);
+	client->setState(CLOSING);
 	client->removeEvent(POLLIN);
 }
