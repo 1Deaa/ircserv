@@ -126,17 +126,11 @@ void	Server::executeCommand(Client *client, const std::string &cmd)
 {
 	if (cmd == "Ping")
 	{
-		std::string reply;
-		reply = "Pong";
-		reply += CRLF;
-		client->getWriteBuffer().append(reply);
+		client->queueWrite("Pong");
 	}
 	else
 	{
-		std::string reply;
-		reply = "Unknown Command";
-		reply += CRLF;
-		client->getWriteBuffer().append(reply);
+		client->queueWrite("Unknown Command");
 	}
 }
 
@@ -157,7 +151,7 @@ void	Server::processBuffer(Client *client)
 		if (cmd.size() > 510)
 		{
 			markClosing(client);
-			client->queueWrite("ERROR: Line too long");
+			client->queueWrite("ERROR: Line too long");// <----
 			return ;
 		}
 		executeCommand(client, cmd);
