@@ -21,6 +21,7 @@ class Client : public Socket
 		std::string	_writeBuffer;
 		std::string	_readBuffer;
 		std::string	_ipAddress;
+		bool		_closing;
 	public:
 		Client(fd_t fd);
 		void				setIPAddress(const std::string &);
@@ -28,6 +29,9 @@ class Client : public Socket
 		std::string			&getReadBuffer(void);
 		std::string			&getWriteBuffer(void);
 		void				updatePollEvents(void);
+		void				queueWrite(std::string);
+		void				setClosing(bool);
+		bool				closingStatus(void);
 		~Client();
 };
 

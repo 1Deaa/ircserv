@@ -67,7 +67,7 @@ void	Server::run()
 {
 	selfSocket();
 
-	std::cout << "Server Listening <" << _selfSocket->getFd() << "> Started" << std::endl;
+	std::cout << GREEN << "Server Listening Socket <" << _selfSocket->getFd() << "> Started" << RESET <<std::endl;
 	std::cout << "Waiting for client connection...\n";
 
 	while (!Server::_signal)
@@ -114,7 +114,7 @@ void	Server::run()
 		{							//      |____________________|
 			for (std::size_t i = 0; i < _disconnected.size(); i++)
 			{
-				std::cout << "Client <" << _disconnected[i]->getFd() << "> disconnected!" << std::endl;
+				std::cout << RED << "[-] Client <" << _disconnected[i]->getFd() << "> disconnected!" << RESET << std::endl;
 				disconnectSocket(_disconnected[i]);
 			}
 			_disconnected.clear();
@@ -144,18 +144,31 @@ void	Server::processBuffer(Client *client)
 {
 	std::size_t	pos;
 	std::string	&buffer = client->getReadBuffer();
-
+	if (buffer.size() > 8192)
+	{
+		markClosing(client);
+		client->queueWrite("ERROR: Input buffer overflow");
+		return ;
+	}
 	while ((pos = buffer.find(CRLF)) != std::string::npos)
 	{
 		std::string	cmd = buffer.substr(0, pos);
 		buffer.erase(0, pos + 2);
+		if (cmd.size() > 510)
+		{
+			markClosing(client);
+			client->queueWrite("ERROR: Line too long");
+			return ;
+		}
 		executeCommand(client, cmd);
 	}
 }
 
 void	Server::receiveData(Client *client)
 {
-	char	buff[1024];
+	if (client->closingStatus())
+		return ;
+	char	buff[4096];
 
 	std::memset(buff, 0, sizeof(buff));
 	ssize_t bytes = recv(client->getFd(), buff, sizeof(buff) - 1, 0);
@@ -173,14 +186,13 @@ void	Server::sendData(Client *client)
 {
 	std::string	&buffer = client->getWriteBuffer();
 
-	if (buffer.empty())
-		return ;
-
 	ssize_t	sent = send(client->getFd(), buffer.data(), buffer.size(), 0);
 
 	if (sent > 0)
 	{
 		buffer.erase(0, sent);
+		if (buffer.empty() && client->closingStatus())
+			markDisconnected(client);
 	}
 	else
 	{
@@ -196,7 +208,9 @@ void	Server::disconnectSocket(Socket *socket)
 
 void	Server::markDisconnected(Client *client)
 {
-	_disconnected.push_back(client);
+	std::vector<Socket*>::iterator	it = std::find(_disconnected.begin(), _disconnected.end(), client);
+	if (it == _disconnected.end())
+		_disconnected.push_back(client);
 }
 
 void	Server::acceptClient(void)
@@ -223,5 +237,11 @@ void	Server::acceptClient(void)
 	client->setIPAddress(inet_ntoa(addr.sin_addr));
 	_sockets.push_back(client);
 
-	std::cout << "Client <" << client->getFd() << "> IP: " << client->getIPAddress() << " connected!" << std::endl;
+	std::cout << GREEN <<"[+] Client <" << client->getFd() << "> IP: " << client->getIPAddress() << " connected!" << RESET << std::endl;
+}
+
+void	Server::markClosing(Client *client)
+{
+	client->setClosing(true);
+	client->removeEvent(POLLIN);
 }

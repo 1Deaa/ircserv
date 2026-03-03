@@ -14,6 +14,11 @@
 #define SERVER_HPP
 
 # define CRLF "\r\n"
+# define RED "\e[0;31m"
+# define WHITE "\e[0;37m"
+# define GREEN "\e[0;32m"
+# define YELLOW "\e[0;33m"
+# define RESET "\e[0m"
 
 # include <iostream>
 # include <vector>
@@ -29,6 +34,7 @@
 # include <algorithm>
 # include "Client.hpp"
 # include "Socket.hpp"
+# include <algorithm>
 
 class Server
 {
@@ -44,6 +50,7 @@ class Server
 		void	receiveData(Client*);
 		void	sendData(Client*);
 		void	markDisconnected(Client*);
+		void	markClosing(Client*);
 		void	disconnectSocket(Socket *);
 		void	processBuffer(Client*);
 		void	executeCommand(Client*, const std::string &);

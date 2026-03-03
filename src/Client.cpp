@@ -12,7 +12,7 @@
 
 #include "Client.hpp"
 
-Client::Client(fd_t fd) : Socket(fd, CLIENT) {}
+Client::Client(fd_t fd) : Socket(fd, CLIENT), _closing(false) {}
 Client::~Client() {}
 
 void	Client::setIPAddress(const std::string &ip)
@@ -41,4 +41,20 @@ void	Client::updatePollEvents(void)
 		this->addEvent(POLLOUT);
 	else
 		this->removeEvent(POLLOUT);
+}
+
+void	Client::queueWrite(std::string str)
+{
+	str.append("\r\n");
+	_writeBuffer.append(str);
+}
+
+void	Client::setClosing(bool val)
+{
+	_closing = val;
+}
+
+bool	Client::closingStatus(void)
+{
+	return (_closing);
 }
