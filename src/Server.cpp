@@ -130,7 +130,7 @@ void	Server::executeCommand(Client *client, const std::string &cmd)
 	}
 	else
 	{
-		client->queueWrite("Unknown Command");
+		client->queueWrite(cmd + " Unknown Command");
 	}
 }
 
