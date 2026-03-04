@@ -17,7 +17,7 @@ void	Server::printError(const std::string &msg)
 	std::cerr << "ircserv: " << msg << std::endl;
 }
 
-Server::Server(int port, const std::string &password): _port(port), _password(password)
+Server::Server(int port, const std::string &password): _port(port), _serverName("Discodo"), _password(password)
 {
 }
 
@@ -130,7 +130,7 @@ void	Server::executeCommand(Client *client, const std::string &cmd)
 	}
 	else
 	{
-		client->queueWrite(cmd + " Unknown Command");
+		client->queueWrite(cmd + " :Unknown Command");
 	}
 }
 
@@ -138,10 +138,10 @@ void	Server::processBuffer(Client *client)
 {
 	std::size_t	pos;
 	std::string	&buffer = client->getReadBuffer();
-	if (buffer.size() > 8192)
+	if (buffer.size() > 4096)
 	{
 		markClosing(client);
-		client->queueWrite("ERROR: Input buffer overflow");
+		client->queueWrite("ERROR :Input buffer overflow");
 		return ;
 	}
 	while ((pos = buffer.find(CRLF)) != std::string::npos)
@@ -151,7 +151,7 @@ void	Server::processBuffer(Client *client)
 		if (cmd.size() > 510)
 		{
 			markClosing(client);
-			client->queueWrite("ERROR: Line too long");// <----
+			client->queueWrite("ERROR :Line too long");// <----
 			return ;
 		}
 		executeCommand(client, cmd);

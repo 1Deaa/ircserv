@@ -41,6 +41,7 @@ class Server
 	private:
 		int						_port;
 		static bool				_signal;
+		std::string				_serverName;
 		std::string				_password;
 		Socket*					_selfSocket;
 		std::vector<Socket*>	_sockets;
