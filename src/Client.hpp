@@ -29,6 +29,12 @@ class Client : public Socket
 		std::string		_readBuffer;
 		std::string		_ipAddress;
 		CLIENT_STATE	_state;
+		std::string		_nickName;
+	public:
+		bool	passed_;
+		bool	nickSet_;
+		bool	userSet_;
+		bool	registered_;
 	public:
 		Client(fd_t fd);
 		void				setIPAddress(const std::string &);
@@ -39,6 +45,7 @@ class Client : public Socket
 		void				queueWrite(std::string);
 		void				setState(CLIENT_STATE);
 		const CLIENT_STATE	&getState(void) const;
+		const std::string	getNick(void) const;
 		~Client();
 };
 

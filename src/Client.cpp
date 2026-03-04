@@ -12,7 +12,14 @@
 
 #include "Client.hpp"
 
-Client::Client(fd_t fd) : Socket(fd, CLIENT), _state(RUNNING) {}
+Client::Client(fd_t fd) : Socket(fd, CLIENT)
+{
+	_state = RUNNING;
+	registered_ = false;
+	passed_ = false;
+	nickSet_ = false;
+	userSet_ = false;
+}
 Client::~Client() {}
 
 void	Client::setIPAddress(const std::string &ip)
@@ -57,4 +64,11 @@ void	Client::setState(CLIENT_STATE val)
 const CLIENT_STATE	&Client::getState(void) const
 {
 	return (_state);
+}
+
+const std::string	Client::getNick(void) const
+{
+	if (_nickName.empty())
+		return ("*");
+	return (_nickName);
 }

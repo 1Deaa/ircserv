@@ -19,6 +19,8 @@ void	Server::printError(const std::string &msg)
 
 Server::Server(int port, const std::string &password): _port(port), _serverName("Discodo"), _password(password)
 {
+	_commandMap["PASS"] = &Server::handlePass;
+	_commandMap["PING"] = &Server::handlePing;
 }
 
 bool	Server::_signal = false;
@@ -122,18 +124,6 @@ void	Server::run()
 	}
 }
 
-void	Server::executeCommand(Client *client, const std::string &cmd)
-{
-	if (cmd == "Ping")
-	{
-		client->queueWrite("Pong");
-	}
-	else
-	{
-		client->queueWrite(cmd + " :Unknown Command");
-	}
-}
-
 void	Server::processBuffer(Client *client)
 {
 	std::size_t	pos;
@@ -154,7 +144,7 @@ void	Server::processBuffer(Client *client)
 			client->queueWrite("ERROR :Line too long");// <----
 			return ;
 		}
-		executeCommand(client, cmd);
+		executeCommand(client, Command(cmd));
 	}
 }
 
@@ -241,4 +231,5 @@ void	Server::markClosing(Client *client)
 {
 	client->setState(CLOSING);
 	client->removeEvent(POLLIN);
+	client->setRevents(0);
 }

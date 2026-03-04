@@ -34,7 +34,10 @@
 # include <algorithm>
 # include "Client.hpp"
 # include "Socket.hpp"
+# include "Command.hpp"
+# include "Replies.hpp"
 # include <algorithm>
+# include <map>
 
 class Server
 {
@@ -54,7 +57,12 @@ class Server
 		void	markClosing(Client*);
 		void	disconnectSocket(Socket *);
 		void	processBuffer(Client*);
-		void	executeCommand(Client*, const std::string &);
+		//
+		void	executeCommand(Client*, const Command &);
+		void	handlePass(Client*, const Command &);
+		void	handlePing(Client*, const Command &);
+		typedef void (Server::*CommandHandler)(Client*, const Command &);
+		std::map<std::string, CommandHandler>	_commandMap;
 	public:
 		Server(int, const std::string &);
 		~Server();
