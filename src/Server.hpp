@@ -71,6 +71,8 @@ class Server
 		void	handlePass(Client*, const Command &);
 		void	handlePing(Client*, const Command &);
 		void	handleNick(Client*, const Command &);
+		void	handleUser(Client*, const Command &);
+		void	handleQuit(Client*, const Command &);
 		typedef void (Server::*CommandHandler)(Client*, const Command &);
 		std::map<std::string, CommandHandler>	_commandMap;
 		bool	nickExists(Client*, const std::string &);

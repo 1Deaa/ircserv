@@ -68,6 +68,36 @@ void	Client::setNick(const std::string &str)
 	_nickName = str;
 }
 
+void	Client::setPassword(const std::string &str)
+{
+	_cpassword = str;
+}
+
+void	Client::setUser(const std::string &str)
+{
+	_userName = str;
+}
+
+void	Client::setRealName(const std::string &str)
+{
+	_realName = str;
+}
+
+const std::string	Client::getUser(void) const
+{
+	return (_userName);
+}
+
+const std::string	Client::getRealName(void) const
+{
+	return (_realName);
+}
+
+const std::string	Client::getPassword(void) const
+{
+	return (_cpassword);
+}
+
 const std::string	Client::getNick(void) const
 {
 	if (_nickName.empty())

@@ -37,6 +37,9 @@ class Client : public Socket
 		std::string				_readBuffer;
 		std::string				_ipAddress;
 		std::string				_nickName;
+		std::string				_userName;
+		std::string				_realName;
+		std::string				_cpassword;
 		CLIENT_NETWORK_STATE	_networkState;
 		int						_loginState;
 	public:
@@ -50,6 +53,12 @@ class Client : public Socket
 		void						setNetworkState(CLIENT_NETWORK_STATE);
 		const CLIENT_NETWORK_STATE	&getNetworkState(void) const;
 		const std::string			getNick(void) const;
+		const std::string			getUser(void) const;
+		const std::string			getRealName(void) const;
+		const std::string			getPassword(void) const;
+		void						setPassword(const std::string &);
+		void						setRealName(const std::string &);
+		void						setUser(const std::string &);
 		void						setNick(const std::string &);
 		void						addLoginState(int);
 		void						rmvLoginState(int);

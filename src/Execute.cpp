@@ -30,8 +30,6 @@ void	Server::executeCommand(Client *client, const Command &cmd)
 
 void	Server::handlePass(Client *client, const Command &cmd)
 {
-	if (client->hasLoginState(LOGIN_PASS))
-		return ;
 	if (client->hasLoginState(LOGIN_REGS))
 	{
 		client->queueWrite(ERR_ALREADYREGISTERED(_serverName, client->getNick()));
@@ -50,13 +48,7 @@ void	Server::handlePass(Client *client, const Command &cmd)
 		printClientLog(client, ERRLOG, cmd.getCommand() + " missing parameter.");
 		return ;
 	}
-	if (pass != _password)
-	{
-		client->queueWrite(ERR_PASSWDMISMATCH(_serverName, client->getNick()));
-		printClientLog(client, ERRLOG, "entered incorrect password.");
-		markClosing(client);
-		return ;
-	}
+	client->setPassword(pass);
 	client->addLoginState(LOGIN_PASS);
 	printClientLog(client, NORMLOG, "entered correct password.");
 	tryRegister(client);
@@ -103,7 +95,7 @@ void	Server::handleNick(Client *client, const Command &cmd)
 	if (!isValidNick(nick))
 	{
 		client->queueWrite(ERR_ERRONEUSNICKNAME(_serverName, client->getNick(), nick));
-		printClientLog(client, ERRLOG, "entered an invalid nickname.");
+		printClientLog(client, ERRLOG, "entered an erroneous nickname.");
 		return ;
 	}
 	if (client->getNick() == nick)
@@ -117,4 +109,41 @@ void	Server::handleNick(Client *client, const Command &cmd)
 	client->addLoginState(LOGIN_NICK);
 	printClientLog(client, NORMLOG, "set a nickname (" + nick + ").");
 	tryRegister(client);
+}
+
+void	Server::handleUser(Client *client, const Command &cmd)
+{
+	if (client->hasLoginState(LOGIN_REGS))
+	{
+		client->queueWrite(ERR_ALREADYREGISTERED(_serverName, client->getNick()));
+		printClientLog(client, ERRLOG, "already registered.");
+		return ;
+	}
+	if (client->hasLoginState(LOGIN_USER))
+	{
+		client->queueWrite(ERR_ALREADYREGISTERED(_serverName, client->getNick()));
+		printClientLog(client, ERRLOG, "already set a username (" + client->getUser() + ":" + client->getRealName() + ").");
+		return ;
+	}
+	if (cmd.getParams().size() < 3 || cmd.getTrailing().empty())
+	{
+		client->queueWrite(ERR_NEEDMOREPARAMS(_serverName, client->getNick(), cmd.getCommand()));
+		printClientLog(client, ERRLOG, cmd.getCommand() + " missing parameter.");
+		return ;
+	}
+
+	std::string	username = cmd.getParams()[0];
+	std::string	realname = cmd.getTrailing();
+
+	client->setUser(username);
+	client->setRealName(realname);
+	printClientLog(client, NORMLOG, "set a username (" + client->getUser() + ":" + client->getRealName() + ").");
+	client->addLoginState(LOGIN_USER);
+	tryRegister(client);
+}
+
+void	Server::handleQuit(Client *client, const Command &)
+{
+	client->queueWrite("");
+	markClosing(client);
 }

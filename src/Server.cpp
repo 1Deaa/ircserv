@@ -47,6 +47,8 @@ Server::Server(int port, const std::string &password): _port(port), _serverName(
 	_commandMap["PASS"] = &Server::handlePass;
 	_commandMap["PING"] = &Server::handlePing;
 	_commandMap["NICK"] = &Server::handleNick;
+	_commandMap["USER"] = &Server::handleUser;
+	_commandMap["QUIT"] = &Server::handleQuit;
 }
 
 bool	Server::_signal = false;
@@ -157,7 +159,7 @@ void	Server::processBuffer(Client *client)
 	if (buffer.size() > 4096)
 	{
 		markClosing(client);
-		client->queueWrite("ERROR :Input buffer overflow");
+		printClientLog(client, ERRLOG, "caused buffer overflow!");
 		return ;
 	}
 	while ((pos = buffer.find(CRLF)) != std::string::npos)
@@ -167,7 +169,7 @@ void	Server::processBuffer(Client *client)
 		if (cmd.size() > 510)
 		{
 			markClosing(client);
-			client->queueWrite("ERROR :Line too long");// <----
+			printClientLog(client, ERRLOG, "sent a long line exceeding 512 bytes");
 			return ;
 		}
 		executeCommand(client, Command(cmd));
@@ -262,14 +264,22 @@ void	Server::markClosing(Client *client)
 
 void	Server::tryRegister(Client *client)
 {
-	int	required = LOG_PASS | LOG_NICK | LOG_USER;
+	int	required = LOGIN_PASS | LOGIN_NICK | LOGIN_USER;
 
-	if (client->hasLoginState(LOG_REGS))
+	if (client->hasLoginState(LOGIN_REGS))
 		return ;
 	if ((client->getLoginState() & required) == required) 
 	{
-		client->addLoginState(LOG_REGS);
-		client->queueWrite("WELCOME!"); // TODO
+		if (client->getPassword() != _password)
+		{
+			client->queueWrite(ERR_PASSWDMISMATCH(_serverName, client->getNick()));
+			printClientLog(client, ERRLOG, "entered incorrect password.");
+			markClosing(client);
+			return ;
+		}
+		client->addLoginState(LOGIN_REGS);
+		client->queueWrite(RPL_WELCOME(_serverName, client->getNick(), client->getUser(), client->getIPAddress()));
+		printClientLog(client, NORMLOG, "registered successfully!");
 	}
 }
 

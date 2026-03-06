@@ -22,6 +22,6 @@
 # define ERR_ERRONEUSNICKNAME(serverName, nickName, tryName) (":" + serverName + " 432 " + nickName + " " + tryName + " :Erroneous nickname")
 # define ERR_NICKNAMEINUSE(serverName, nickName, tryName) (":" + serverName + " 433 " + nickName + " " + tryName + " :Nickname is already in use")
 // ACK
-# define RPL_WELCOME
+# define RPL_WELCOME(serverName, nickName, userName, hostName) (":" + serverName + " 001 " + nickName + " :Welcome to the Internet Relay Network " + nickName + "!" + userName + "@" + hostName)
 
 #endif
