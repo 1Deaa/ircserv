@@ -13,12 +13,13 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-# define CRLF "\r\n"
-# define RED "\e[0;31m"
-# define WHITE "\e[0;37m"
-# define GREEN "\e[0;32m"
-# define YELLOW "\e[0;33m"
-# define RESET "\e[0m"
+# define CRLF	"\r\n"
+# define RED	"\e[0;31m"
+# define WHITE	"\e[0;37m"
+# define GREEN	"\e[0;32m"
+# define YELLOW	"\e[0;33m"
+# define BLUE	"\e[0;34m"
+# define RESET	"\e[0m"
 
 # include <iostream>
 # include <vector>
@@ -38,6 +39,14 @@
 # include "Replies.hpp"
 # include <algorithm>
 # include <map>
+
+enum LOG
+{
+	CONNLOG,
+	NORMLOG,
+	ERRLOG,
+	DISCLOG
+};
 
 class Server
 {
@@ -61,13 +70,18 @@ class Server
 		void	executeCommand(Client*, const Command &);
 		void	handlePass(Client*, const Command &);
 		void	handlePing(Client*, const Command &);
+		void	handleNick(Client*, const Command &);
 		typedef void (Server::*CommandHandler)(Client*, const Command &);
 		std::map<std::string, CommandHandler>	_commandMap;
+		bool	nickExists(Client*, const std::string &);
+		void	tryRegister(Client*);
 	public:
 		Server(int, const std::string &);
 		~Server();
 		void		run(void);
 		static void	printError(const std::string &);
+		static void	printClientLog(Client *client, LOG type, const std::string &msg);
+		static void	printClientLog(Client *client, LOG type);
 		static void	signalHandler(int);
 };
 

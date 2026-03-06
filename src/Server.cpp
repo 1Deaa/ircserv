@@ -17,10 +17,36 @@ void	Server::printError(const std::string &msg)
 	std::cerr << "ircserv: " << msg << std::endl;
 }
 
+void	Server::printClientLog(Client *client, LOG type)
+{
+	printClientLog(client, type, "");
+}
+
+void	Server::printClientLog(Client *client, LOG type, const std::string &msg)
+{
+	switch (type)
+	{
+		case CONNLOG:
+			std::cout << GREEN << "[+] Client <" << client->getFd() << "> IP: " << client->getIPAddress() << " connected!" << RESET << std::endl;
+			break ;
+		case ERRLOG:
+			std::cout << YELLOW << "[*] Client <" << client->getFd() << "> " << msg << RESET << std::endl;
+			break ;
+		case DISCLOG:
+			std::cout << RED << "[-] Client <" << client->getFd() << "> disconnected!" << RESET << std::endl;
+			break ;
+		case NORMLOG:
+			std::cout << BLUE << "[/] Client <" << client->getFd() << "> " << msg << RESET << std::endl;
+		default:
+			break;
+	}
+}
+
 Server::Server(int port, const std::string &password): _port(port), _serverName("Discodo"), _password(password)
 {
 	_commandMap["PASS"] = &Server::handlePass;
 	_commandMap["PING"] = &Server::handlePing;
+	_commandMap["NICK"] = &Server::handleNick;
 }
 
 bool	Server::_signal = false;
@@ -116,7 +142,7 @@ void	Server::run()
 		{							//      |____________________|
 			for (std::size_t i = 0; i < _disconnected.size(); i++)
 			{
-				std::cout << RED << "[-] Client <" << _disconnected[i]->getFd() << "> disconnected!" << RESET << std::endl;
+				printClientLog(static_cast<Client*>(_disconnected[i]), DISCLOG);
 				disconnectSocket(_disconnected[i]);
 			}
 			_disconnected.clear();
@@ -150,7 +176,7 @@ void	Server::processBuffer(Client *client)
 
 void	Server::receiveData(Client *client)
 {
-	if (CLOSING == client->getState())
+	if (CLOSING == client->getNetworkState())
 		return ;
 	char	buff[4096];
 
@@ -175,7 +201,7 @@ void	Server::sendData(Client *client)
 	if (sent > 0)
 	{
 		buffer.erase(0, sent);
-		if (buffer.empty() && client->getState() == CLOSING)
+		if (buffer.empty() && client->getNetworkState() == CLOSING)
 			markDisconnected(client);
 	}
 	else
@@ -195,7 +221,7 @@ void	Server::markDisconnected(Client *client)
 	std::vector<Socket*>::iterator	it = std::find(_disconnected.begin(), _disconnected.end(), client);
 	if (it == _disconnected.end())
 	{
-		client->setState(DISCONN);
+		client->setNetworkState(DISCONN);
 		_disconnected.push_back(client);
 	}
 }
@@ -224,12 +250,38 @@ void	Server::acceptClient(void)
 	client->setIPAddress(inet_ntoa(addr.sin_addr));
 	_sockets.push_back(client);
 
-	std::cout << GREEN <<"[+] Client <" << client->getFd() << "> IP: " << client->getIPAddress() << " connected!" << RESET << std::endl;
+	printClientLog(client, CONNLOG);
 }
 
 void	Server::markClosing(Client *client)
 {
-	client->setState(CLOSING);
+	client->setNetworkState(CLOSING);
 	client->removeEvent(POLLIN);
 	client->setRevents(0);
+}
+
+void	Server::tryRegister(Client *client)
+{
+	int	required = LOG_PASS | LOG_NICK | LOG_USER;
+
+	if (client->hasLoginState(LOG_REGS))
+		return ;
+	if ((client->getLoginState() & required) == required) 
+	{
+		client->addLoginState(LOG_REGS);
+		client->queueWrite("WELCOME!"); // TODO
+	}
+}
+
+bool	Server::nickExists(Client *client, const std::string &nick)
+{
+	for (std::size_t i = 0; i < _sockets.size(); i++)
+	{
+		if (_sockets[i]->getType() != CLIENT)
+			continue ;
+		Client	*otherClient = static_cast<Client*>(_sockets[i]);
+		if (otherClient->getNick() == nick && otherClient != client)
+			return (true);
+	}
+	return (false);
 }

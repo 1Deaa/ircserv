@@ -14,11 +14,8 @@
 
 Client::Client(fd_t fd) : Socket(fd, CLIENT)
 {
-	_state = RUNNING;
-	registered_ = false;
-	passed_ = false;
-	nickSet_ = false;
-	userSet_ = false;
+	_networkState = RUNNING;
+	_loginState = 0;
 }
 Client::~Client() {}
 
@@ -56,14 +53,19 @@ void	Client::queueWrite(std::string str)
 	_writeBuffer.append(str);
 }
 
-void	Client::setState(CLIENT_STATE val)
+void	Client::setNetworkState(CLIENT_NETWORK_STATE val)
 {
-	_state = val;
+	_networkState = val;
 }
 
-const CLIENT_STATE	&Client::getState(void) const
+const CLIENT_NETWORK_STATE	&Client::getNetworkState(void) const
 {
-	return (_state);
+	return (_networkState);
+}
+
+void	Client::setNick(const std::string &str)
+{
+	_nickName = str;
 }
 
 const std::string	Client::getNick(void) const
@@ -71,4 +73,24 @@ const std::string	Client::getNick(void) const
 	if (_nickName.empty())
 		return ("*");
 	return (_nickName);
+}
+
+void	Client::addLoginState(int val)
+{
+	_loginState |= val;
+}
+
+void	Client::rmvLoginState(int val)
+{
+	_loginState &= ~val;
+}
+
+int		Client::getLoginState(void) const
+{
+	return (_loginState);
+}
+
+bool	Client::hasLoginState(int val) const
+{
+	return ((_loginState & val) != 0);
 }

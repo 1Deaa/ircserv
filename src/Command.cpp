@@ -16,7 +16,6 @@ Command::Command(const std::string &cmd)
 {
 	parse(cmd);
 	_command = toUpper(_command);
-	print();
 }
 
 const std::string	&Command::getCommand(void) const
@@ -34,38 +33,45 @@ const std::string	&Command::getTrailing(void) const
 	return (_trailing);
 }
 
-void	Command::parse(const std::string &cmd) //<---- TODO: Fix parser too strict!
+void Command::parse(const std::string &line)
 {
-	std::string	tmp = cmd;
-	size_t		pos;
+	size_t i = 0;
+	size_t len = line.length();
 
-	pos = tmp.find(' ');
-	if (pos == std::string::npos)
-	{
-		_command = tmp;
-		return ;
-	}
+	// skip leading spaces
+	while (i < len && line[i] == ' ')
+		i++;
 
-	_command = tmp.substr(0, pos);
-	tmp.erase(0, pos + 1);
-	
-	while (!tmp.empty())
+	// -------- COMMAND --------
+	size_t start = i;
+	while (i < len && line[i] != ' ')
+		i++;
+
+	_command = line.substr(start, i - start);
+
+	// -------- PARAMETERS --------
+	while (i < len)
 	{
-		if (tmp[0] == ':')
+		// skip spaces
+		while (i < len && line[i] == ' ')
+			i++;
+
+		if (i >= len)
+			break;
+
+		// trailing part
+		if (line[i] == ':')
 		{
-			_trailing = tmp.substr(1);
-			break ;
+			_trailing = line.substr(i + 1);
+			break;
 		}
-		pos = tmp.find(' ');
-		if (pos == std::string::npos)
-		{
-			_params.push_back(tmp);
-			break ;
-		}
-		_params.push_back(tmp.substr(0, pos));
-		tmp.erase(0, pos + 1);
-		while (!tmp.empty() && tmp[0] == ' ')
-			tmp.erase(0, 1);
+
+		start = i;
+
+		while (i < len && line[i] != ' ')
+			i++;
+
+		_params.push_back(line.substr(start, i - start));
 	}
 }
 
