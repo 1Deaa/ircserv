@@ -49,6 +49,9 @@ Server::Server(int port, const std::string &password): _port(port), _serverName(
 	_commandMap["NICK"] = &Server::handleNick;
 	_commandMap["USER"] = &Server::handleUser;
 	_commandMap["QUIT"] = &Server::handleQuit;
+	_commandMap["JOIN"] = &Server::handleJoin;
+	_commandMap["PRIVMSG"] = &Server::handlePrivmsg;
+	_commandMap["PART"] = &Server::handlePart;
 }
 
 bool	Server::_signal = false;
@@ -61,9 +64,12 @@ void	Server::signalHandler(int signo)
 
 Server::~Server()
 {
-	for (std::size_t i = 0; i < _sockets.size(); i++)
+	for (std::size_t i = 0; i < _sockets.size(); ++i)
 		delete (_sockets[i]);
 	_sockets.clear();
+	for (std::size_t i = 0; i < _channels.size(); ++i)
+		delete (_channels[i]);
+	_channels.clear();
 }
 
 void	Server::selfSocket(void)
@@ -186,7 +192,8 @@ void	Server::receiveData(Client *client)
 	ssize_t bytes = recv(client->getFd(), buff, sizeof(buff) - 1, 0);
 	if (bytes <= 0)
 	{
-		markDisconnected(client);
+		handleQuit(client);
+		// markDisconnected(client);
 		return ;
 	}
 	std::string		&buffer = client->getReadBuffer();
@@ -204,11 +211,13 @@ void	Server::sendData(Client *client)
 	{
 		buffer.erase(0, sent);
 		if (buffer.empty() && client->getNetworkState() == CLOSING)
-			markDisconnected(client);
+			handleQuit(client);
+			// markDisconnected(client);
 	}
 	else
 	{
-		markDisconnected(client);
+		handleQuit(client);
+		// markDisconnected(client);
 	}
 }
 
@@ -251,7 +260,6 @@ void	Server::acceptClient(void)
 	client->setRevents(0);
 	client->setIPAddress(inet_ntoa(addr.sin_addr));
 	_sockets.push_back(client);
-
 	printClientLog(client, CONNLOG);
 }
 
@@ -277,6 +285,7 @@ void	Server::tryRegister(Client *client)
 			markClosing(client);
 			return ;
 		}
+		printClientLog(client, NORMLOG, "entered correct password.");
 		client->addLoginState(LOGIN_REGS);
 		client->queueWrite(RPL_WELCOME(_serverName, client->getNick(), client->getUser(), client->getIPAddress()));
 		printClientLog(client, NORMLOG, "registered successfully!");
@@ -285,13 +294,115 @@ void	Server::tryRegister(Client *client)
 
 bool	Server::nickExists(Client *client, const std::string &nick)
 {
+	Client	*otherClient;
 	for (std::size_t i = 0; i < _sockets.size(); i++)
 	{
 		if (_sockets[i]->getType() != CLIENT)
 			continue ;
-		Client	*otherClient = static_cast<Client*>(_sockets[i]);
+		otherClient = static_cast<Client*>(_sockets[i]);
 		if (otherClient->getNick() == nick && otherClient != client)
 			return (true);
 	}
 	return (false);
+}
+
+Channel	*Server::getChannel(const std::string &_name)
+{
+	std::string	name = Command::toUpper(_name);
+	for (std::size_t i = 0; i < _channels.size(); ++i)
+	{
+		if (_channels[i]->getName() == name)
+			return (_channels[i]);
+	}
+	return (NULL);
+}
+
+Channel	*Server::createChannel(const std::string &_name)
+{
+	std::string name = Command::toUpper(_name);
+	Channel	*channel = new Channel(name);
+	_channels.push_back(channel);
+	return (channel);
+}
+
+void	Server::broadcast(Channel *channel, const std::string &msg)
+{
+	broadcast(channel, msg, NULL);
+}
+
+void	Server::broadcast(Client *client, const std::string &msg)
+{
+	std::vector<Client*> notified;
+	const std::vector<Channel*> &channels = client->getChannels();
+
+	for (std::size_t i = 0; i < channels.size(); ++i)
+	{
+		const std::vector<Client*> &members = channels[i]->getMembers();
+
+		for (std::size_t j = 0; j < members.size(); ++j)
+		{
+			Client *target = members[j];
+
+			if (target == client)
+				continue;
+
+			bool already = false;
+
+			for (std::size_t k = 0; k < notified.size(); ++k)
+			{
+				if (notified[k] == target)
+				{
+					already = true;
+					break;
+				}
+			}
+
+			if (!already)
+			{
+				target->queueWrite(msg);
+				notified.push_back(target);
+			}
+		}
+	}
+}
+
+void	Server::broadcast(Channel *channel, const std::string &msg, Client *exclude)
+{
+	if (!channel)
+		return ;
+	const std::vector<Client*>	&members = channel->getMembers();
+	for (size_t i = 0; i < members.size(); ++i)
+	{
+		if (members[i] != exclude)
+			members[i]->queueWrite(msg);
+	}
+}
+
+Client	*Server::getClient(const std::string &_str)
+{
+	Client	*client;
+	const std::string str = Command::toUpper(_str);
+
+	for (std::size_t i = 0; i < _sockets.size(); i++)
+	{
+		if (_sockets[i]->getType() != CLIENT)
+			continue ;
+		client = static_cast<Client*>(_sockets[i]);
+		if (Command::toUpper(client->getNick()) == str && client->hasLoginState(LOGIN_REGS))
+			return (client);
+	}
+	return (NULL);
+}
+
+void	Server::removeChannel(Channel *channel)
+{
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (*it == channel)
+		{
+			_channels.erase(it);
+			delete (*it);
+			return;
+		}
+	}
 }

@@ -21,6 +21,12 @@
 # define ERR_NOTREGISTERED(serverName, nickName) (":" + serverName + " 451 " + nickName + " :You have not registered")
 # define ERR_ERRONEUSNICKNAME(serverName, nickName, tryName) (":" + serverName + " 432 " + nickName + " " + tryName + " :Erroneous nickname")
 # define ERR_NICKNAMEINUSE(serverName, nickName, tryName) (":" + serverName + " 433 " + nickName + " " + tryName + " :Nickname is already in use")
+# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) (":" + serverName + " 403 " + nickName + " " + channelName + " :No such channel")
+# define ERR_TOOMANYCHANNELS(serverName, nickName, channelName) (":" + serverName + " 405 " + nickName + " " + channelName + " :You have joined too many channels")
+# define ERR_NOSUCHNICK(serverName, nickName, target) (":" + serverName + " 401 " + nickName + " " + target + " :No such nick/channel")
+# define ERR_NOTEXTTOSEND(serverName, nickName) (":" + serverName + " 412 " + nickName + " :No text to send")
+# define ERR_NOTONCHANNEL(serverName, nickName, channelName) (":" + serverName + " 442 " + nickName + " " + channelName + " :You're not on that channel")
+# define ERR_CANNOTSENDTOCHAN(serverName, nickName, channelName) (":" + serverName + " 404 " + nickName + " " + channelName + " :Cannot send to channel")
 // ACK
 # define RPL_WELCOME(serverName, nickName, userName, hostName) (":" + serverName + " 001 " + nickName + " :Welcome to the Internet Relay Network " + nickName + "!" + userName + "@" + hostName)
 

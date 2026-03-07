@@ -13,7 +13,9 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#include "Server.hpp"
 #include "Socket.hpp"
+#include "Channel.hpp"
 
 enum CLIENT_NETWORK_STATE
 {
@@ -42,6 +44,7 @@ class Client : public Socket
 		std::string				_cpassword;
 		CLIENT_NETWORK_STATE	_networkState;
 		int						_loginState;
+		std::vector<Channel*>	_channels;
 	public:
 		Client(fd_t fd);
 		void						setIPAddress(const std::string &);
@@ -53,9 +56,13 @@ class Client : public Socket
 		void						setNetworkState(CLIENT_NETWORK_STATE);
 		const CLIENT_NETWORK_STATE	&getNetworkState(void) const;
 		const std::string			getNick(void) const;
+		const std::string			getPrefix(void) const;
 		const std::string			getUser(void) const;
 		const std::string			getRealName(void) const;
 		const std::string			getPassword(void) const;
+		const std::vector<Channel*>	&getChannels(void) const;
+		void						addChannel(Channel *);
+		void						rmvChannel(Channel *);
 		void						setPassword(const std::string &);
 		void						setRealName(const std::string &);
 		void						setUser(const std::string &);

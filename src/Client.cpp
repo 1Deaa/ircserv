@@ -49,6 +49,8 @@ void	Client::updatePollEvents(void)
 
 void	Client::queueWrite(std::string str)
 {
+	if (str.length() > 510)
+		str = str.substr(0, 510);
 	str.append("\r\n");
 	_writeBuffer.append(str);
 }
@@ -98,6 +100,11 @@ const std::string	Client::getPassword(void) const
 	return (_cpassword);
 }
 
+const std::string	Client::getPrefix(void) const
+{
+	return (getNick() + "!" + getUser() + "@" + getIPAddress());
+}
+
 const std::string	Client::getNick(void) const
 {
 	if (_nickName.empty())
@@ -123,4 +130,26 @@ int		Client::getLoginState(void) const
 bool	Client::hasLoginState(int val) const
 {
 	return ((_loginState & val) != 0);
+}
+
+const std::vector<Channel*>	&Client::getChannels(void) const
+{
+	return (_channels);
+}
+
+void	Client::addChannel(Channel *channel)
+{
+	_channels.push_back(channel);
+}
+
+void Client::rmvChannel(Channel *channel)
+{
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (*it == channel)
+		{
+			_channels.erase(it);
+			return;
+		}
+	}
 }

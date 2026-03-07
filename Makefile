@@ -17,7 +17,7 @@ CXXFLAGS=-Wall -Wextra -Werror -std=c++98
 
 SRC=main.cpp \
 	Server.cpp Client.cpp \
-	Socket.cpp Command.cpp Execute.cpp
+	Socket.cpp Command.cpp Execute.cpp Channel.cpp
 
 SOURCES=$(addprefix src/, $(SRC))
 
