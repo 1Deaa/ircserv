@@ -86,9 +86,9 @@ class Server
 		void	broadcast(Channel *, const std::string &, Client *exclude);
 		void	broadcast(Client *, const std::string &);
 		void	handlePass(Client*, const Command &);
-		void	handlePing(Client*, const Command &);
 		void	handleNick(Client*, const Command &);
 		void	handleUser(Client*, const Command &);
+		void	handleTopic(Client*, const Command &);
 		void	handleQuit(Client*, const Command &);
 		void	handleQuit(Client*);
 		void	handleKick(Client*, const Command &);

@@ -31,5 +31,7 @@
 # define ERR_CHANOPRIVSNEEDED(serverName, nick, channel) (":" + serverName + " 482 " + nick + " " + channel + " :You're not channel operator")
 // RPL
 # define RPL_WELCOME(serverName, nickName, userName, hostName) (":" + serverName + " 001 " + nickName + " :Welcome to the Internet Relay Network " + nickName + "!" + userName + "@" + hostName)
+# define RPL_NOTOPIC(serverName, nickName, channelName) (":" + serverName + " 331 " + nickName + " " + channelName + " :No topic is set")
+# define RPL_TOPIC(serverName, nickName, channelName, topic) (":" + serverName + " 332 " + nickName + " " + channelName + " :" + topic)
 
 #endif

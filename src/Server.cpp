@@ -45,7 +45,6 @@ void	Server::printClientLog(Client *client, LOG type, const std::string &msg)
 Server::Server(int port, const std::string &password): _port(port), _serverName("Discodo"), _password(password)
 {
 	_commandMap["PASS"] = &Server::handlePass;
-	_commandMap["PING"] = &Server::handlePing;
 	_commandMap["NICK"] = &Server::handleNick;
 	_commandMap["USER"] = &Server::handleUser;
 	_commandMap["QUIT"] = &Server::handleQuit;
@@ -53,6 +52,7 @@ Server::Server(int port, const std::string &password): _port(port), _serverName(
 	_commandMap["PRIVMSG"] = &Server::handlePrivmsg;
 	_commandMap["PART"] = &Server::handlePart;
 	_commandMap["KICK"] = &Server::handleKick;
+	_commandMap["TOPIC"] = &Server::handleTopic;
 }
 
 bool	Server::_signal = false;
@@ -301,7 +301,7 @@ bool	Server::nickExists(Client *client, const std::string &nick)
 		if (_sockets[i]->getType() != CLIENT)
 			continue ;
 		otherClient = static_cast<Client*>(_sockets[i]);
-		if (otherClient->getNick() == nick && otherClient != client)
+		if (Command::toUpper(otherClient->getNick()) == Command::toUpper(nick) && otherClient != client)
 			return (true);
 	}
 	return (false);

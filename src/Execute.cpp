@@ -53,17 +53,6 @@ void	Server::handlePass(Client *client, const Command &cmd)
 	tryRegister(client);
 }
 
-void	Server::handlePing(Client *client, const Command &)
-{
-	if (!client->hasLoginState(LOGIN_REGS))
-	{
-		client->queueWrite(ERR_NOTREGISTERED(_serverName, client->getNick()));
-		printClientLog(client, ERRLOG, "has not registered.");
-		return ;
-	}
-	client->queueWrite("Pong!");
-}
-
 static bool	isValidNick(const std::string &nick)
 {
 	if (nick.empty() || nick.length() > 9)
@@ -384,4 +373,52 @@ void	Server::handleKick(Client *client, const Command &cmd)
 	target->rmvChannel(channel);
 	if (channel->getMembers().empty())
 		removeChannel(channel);
+}
+
+void	Server::handleTopic(Client *client, const Command &cmd)
+{
+	if (!client->hasLoginState(LOGIN_REGS))
+	{
+		client->queueWrite(ERR_NOTREGISTERED(_serverName, client->getNick()));
+		printClientLog(client, ERRLOG, "has not registered.");
+		return ;
+	}
+
+	if (cmd.getParams().empty())
+	{
+		client->queueWrite(ERR_NEEDMOREPARAMS(_serverName, client->getNick(), cmd.getCommand()));
+		return ;
+	}
+
+	std::string	channelName = cmd.getParams()[0];
+	Channel	*channel = getChannel(channelName);
+
+	if (!channel)
+	{
+		client->queueWrite(ERR_NOSUCHCHANNEL(_serverName, client->getNick(), channelName));
+		return ;
+	}
+
+	if (!channel->isMember(client))
+	{
+		client->queueWrite(ERR_NOTONCHANNEL(_serverName, client->getNick(), channelName));
+		return ;
+	}
+
+	if (cmd.getTrailing().empty())
+	{
+		if (channel->getTopic().empty())
+		{
+			client->queueWrite(RPL_NOTOPIC(_serverName, client->getNick(), channelName));
+		}
+		else
+		{
+			client->queueWrite(RPL_TOPIC(_serverName, client->getNick(), channelName, channel->getTopic()));
+		}
+		return ;
+	}
+	std::string	topic = cmd.getTrailing();
+	channel->setTopic(topic);
+	std::string	msg = ":" + client->getPrefix() + " TOPIC " + channelName + " :" + topic;
+	broadcast(channel, msg);
 }
