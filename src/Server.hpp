@@ -91,6 +91,7 @@ class Server
 		void	handleUser(Client*, const Command &);
 		void	handleQuit(Client*, const Command &);
 		void	handleQuit(Client*);
+		void	handleKick(Client*, const Command &);
 		void	handleJoin(Client*, const Command &);
 		void	handlePart(Client*, const Command &);
 		void	handlePrivmsg(Client*, const Command &);

@@ -52,6 +52,7 @@ Server::Server(int port, const std::string &password): _port(port), _serverName(
 	_commandMap["JOIN"] = &Server::handleJoin;
 	_commandMap["PRIVMSG"] = &Server::handlePrivmsg;
 	_commandMap["PART"] = &Server::handlePart;
+	_commandMap["KICK"] = &Server::handleKick;
 }
 
 bool	Server::_signal = false;

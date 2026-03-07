@@ -27,7 +27,9 @@
 # define ERR_NOTEXTTOSEND(serverName, nickName) (":" + serverName + " 412 " + nickName + " :No text to send")
 # define ERR_NOTONCHANNEL(serverName, nickName, channelName) (":" + serverName + " 442 " + nickName + " " + channelName + " :You're not on that channel")
 # define ERR_CANNOTSENDTOCHAN(serverName, nickName, channelName) (":" + serverName + " 404 " + nickName + " " + channelName + " :Cannot send to channel")
-// ACK
+# define ERR_USERNOTINCHANNEL(serverName, nick, target, channel) (":" + serverName + " 441 " + nick + " " + target + " " + channel + " :They aren't on that channel")
+# define ERR_CHANOPRIVSNEEDED(serverName, nick, channel) (":" + serverName + " 482 " + nick + " " + channel + " :You're not channel operator")
+// RPL
 # define RPL_WELCOME(serverName, nickName, userName, hostName) (":" + serverName + " 001 " + nickName + " :Welcome to the Internet Relay Network " + nickName + "!" + userName + "@" + hostName)
 
 #endif
