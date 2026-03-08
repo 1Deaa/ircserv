@@ -29,9 +29,18 @@
 # define ERR_CANNOTSENDTOCHAN(serverName, nickName, channelName) (":" + serverName + " 404 " + nickName + " " + channelName + " :Cannot send to channel")
 # define ERR_USERNOTINCHANNEL(serverName, nick, target, channel) (":" + serverName + " 441 " + nick + " " + target + " " + channel + " :They aren't on that channel")
 # define ERR_CHANOPRIVSNEEDED(serverName, nick, channel) (":" + serverName + " 482 " + nick + " " + channel + " :You're not channel operator")
+# define ERR_INVITEONLYCHAN(serverName, nickName, channelName) (":" + serverName + " 473 " + nickName + " " + channelName + " :Cannot join channel (+i)")
+# define ERR_USERONCHANNEL(serverName, nickName, targetNick, channelName) (":" + serverName + " 443 " + nickName + " " + targetNick + " " + channelName + " :is already on channel")
+# define ERR_BADCHANNELKEY(serverName, nickName, channelName) (":" + serverName + " 475 " + nickName + " " + channelName + " :Cannot join channel (+k)")
+# define ERR_CHANNELISFULL(serverName, nickName, channelName) (":" + serverName + " 471 " + nickName + " " + channelName + " :Cannot join channel (+l)")
 // RPL
 # define RPL_WELCOME(serverName, nickName, userName, hostName) (":" + serverName + " 001 " + nickName + " :Welcome to the Internet Relay Network " + nickName + "!" + userName + "@" + hostName)
 # define RPL_NOTOPIC(serverName, nickName, channelName) (":" + serverName + " 331 " + nickName + " " + channelName + " :No topic is set")
 # define RPL_TOPIC(serverName, nickName, channelName, topic) (":" + serverName + " 332 " + nickName + " " + channelName + " :" + topic)
+# define RPL_INVITING(serverName, nickName, targetNick, channelName) (":" + serverName + " 341 " + nickName + " " + targetNick + " " + channelName)
+# define RPL_WHOREPLY(serverName, nick, channel, user, host, servername, targetnick, status, realname) (":" + serverName + " 352 " + nick + " " + channel + " " + user + " " + host + " " + servername + " " + targetnick + " " + status + " :0 " + realname)
+# define RPL_ENDOFWHO(serverName, nick, mask) (":" + serverName + " 315 " + nick + " " + mask + " :End of WHO list")
+# define RPL_NAMREPLY(serverName, nick, channel, names) (":" + serverName + " 353 " + nick + " = " + channel + " :" + names)
+# define RPL_ENDOFNAMES(serverName, nick, channel) (":" + serverName + " 366 " + nick + " " + channel + " :End of /NAMES list")
 
 #endif

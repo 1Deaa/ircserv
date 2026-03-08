@@ -85,23 +85,112 @@ void	Channel::removeMember(Client *client)
 	}
 }
 
-void	Channel::removeOperator(Client *client)
+void Channel::removeOperator(Client *client)
 {
 	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
 	{
 		if (*it == client)
 		{
 			_operators.erase(it);
-			return ;
+			break ;
 		}
 	}
 }
 
-Channel::Channel(const std::string &str): _name(str)
+Channel::Channel(const std::string &str): _name(str), _inviteOnly(false), _topicRestricted(false), _userLimit(0)
 {
+
 }
 
 Channel::~Channel()
 {
 
+}
+
+bool	Channel::isInviteOnly() const
+{
+	return (_inviteOnly);
+}
+
+bool	Channel::isTopicRestricted() const
+{
+	return (_topicRestricted);
+}
+
+const size_t		&Channel::getUserLimit() const
+{
+	return (_userLimit);
+}
+
+void	Channel::setInviteOnly(bool val)
+{
+	_inviteOnly = val;
+}
+
+void	Channel::setTopicRestricted(bool val)
+{
+	_topicRestricted = val;
+}
+
+void	Channel::setKey(const std::string &key)
+{
+	_key = key;
+}
+
+void	Channel::removeKey()
+{
+	_key.clear();
+}
+
+const std::string &Channel::getKey() const
+{
+	return (_key);
+}
+
+bool	Channel::hasKey() const
+{
+	return (!_key.empty());
+}
+
+bool	Channel::isInvited(Client *client) const
+{
+	for (std::size_t i = 0; i < _invited.size(); ++i)
+	{
+		if (_invited[i] == client)
+			return (true);
+	}
+	return (false);
+}
+
+void	Channel::addInvite(Client *client)
+{
+	if (!isInvited(client))
+		_invited.push_back(client);
+}
+
+void	Channel::removeInvite(Client *client)
+{
+	for (std::vector<Client*>::iterator it = _invited.begin(); it != _invited.end(); ++it)
+	{
+		if (*it == client)
+		{
+			_invited.erase(it);
+			return ;
+		}
+	}
+}
+
+void	Channel::setUserLimit(size_t limit)
+{
+	_userLimit = limit;
+}
+
+bool	Channel::hasLimit() const
+{
+	return (_userLimit > 0);
+}
+
+void	Channel::removeUserLimit()
+{
+	_userLimit = 0;
 }

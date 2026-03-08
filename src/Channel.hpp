@@ -24,7 +24,12 @@ class Channel
 		std::string				_name;
 		std::vector<Client*>	_members;
 		std::vector<Client*>	_operators;
+		std::vector<Client*>	_invited;
 		std::string				_topic;
+		bool					_inviteOnly;
+		bool					_topicRestricted;
+		std::string				_key;
+		size_t					_userLimit;
 	public:
 		Channel(const std::string &);
 		~Channel();
@@ -36,15 +41,31 @@ class Channel
 	public:
 		void	setName(const std::string &);
 		void	setTopic(const std::string &);
+		void	setInviteOnly(bool);
+		void	setTopicRestricted(bool);
+		void	setUserLimit(size_t);
+		void	setKey(const std::string &);
 	public:
 		void	addMember(Client *);
 		void	addOperator(Client *);
+		void	addInvite(Client *);
 	public:
 		bool	isMember(Client *) const;
 		bool	isOperator(Client *) const;
+		bool	isInviteOnly() const;
+		bool	isTopicRestricted() const;
+		bool	isInvited(Client *) const;
+		bool	hasKey() const;
+		bool	hasLimit() const;
+	public:
+		const std::string	&getKey() const;
+		const size_t		&getUserLimit() const;
 	public:
 		void	removeMember(Client *);
 		void	removeOperator(Client *);
+		void	removeKey();
+		void	removeUserLimit();
+		void	removeInvite(Client *);
 };
 
 #endif

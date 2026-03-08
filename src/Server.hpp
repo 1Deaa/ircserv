@@ -38,6 +38,7 @@
 # include "Command.hpp"
 # include "Replies.hpp"
 # include "Channel.hpp"
+# include <sstream>
 # include <algorithm>
 # include <map>
 
@@ -94,7 +95,17 @@ class Server
 		void	handleKick(Client*, const Command &);
 		void	handleJoin(Client*, const Command &);
 		void	handlePart(Client*, const Command &);
+		void	handleInvite(Client*, const Command &);
+		void	handleMode(Client*, const Command &);
 		void	handlePrivmsg(Client*, const Command &);
+		void	handleWho(Client*, const Command &);
+		void	parseModeChange(Client*, Channel*, const Command &);
+		void	handleModeInvite(Client	*, Channel*, bool);
+		void	handleModeTopic(Client*, Channel*, bool);
+		void	handleModeKey(Client*, Channel*, bool, const Command &, size_t&);
+		void	handleModeLimit(Client*, Channel*, bool, const Command &, size_t&);
+		void	handleModeOperator(Client*, Channel*, bool, const Command &, size_t&);
+		std::string	buildNames(Channel*);
 		typedef void (Server::*CommandHandler)(Client*, const Command &);
 		std::map<std::string, CommandHandler>	_commandMap;
 		bool	nickExists(Client*, const std::string &);

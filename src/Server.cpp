@@ -50,9 +50,12 @@ Server::Server(int port, const std::string &password): _port(port), _serverName(
 	_commandMap["QUIT"] = &Server::handleQuit;
 	_commandMap["JOIN"] = &Server::handleJoin;
 	_commandMap["PRIVMSG"] = &Server::handlePrivmsg;
+	_commandMap["MODE"] = &Server::handleMode;
 	_commandMap["PART"] = &Server::handlePart;
 	_commandMap["KICK"] = &Server::handleKick;
 	_commandMap["TOPIC"] = &Server::handleTopic;
+	_commandMap["INVITE"] = &Server::handleInvite;
+	_commandMap["WHO"] = &Server::handleWho;
 }
 
 bool	Server::_signal = false;
