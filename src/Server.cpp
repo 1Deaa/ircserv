@@ -197,7 +197,6 @@ void	Server::receiveData(Client *client)
 	if (bytes <= 0)
 	{
 		handleQuit(client);
-		// markDisconnected(client);
 		return ;
 	}
 	std::string		&buffer = client->getReadBuffer();
@@ -216,12 +215,10 @@ void	Server::sendData(Client *client)
 		buffer.erase(0, sent);
 		if (buffer.empty() && client->getNetworkState() == CLOSING)
 			handleQuit(client);
-			// markDisconnected(client);
 	}
 	else
 	{
 		handleQuit(client);
-		// markDisconnected(client);
 	}
 }
 
