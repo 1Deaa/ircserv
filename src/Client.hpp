@@ -13,32 +13,64 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#include "Server.hpp"
 #include "Socket.hpp"
+#include "Channel.hpp"
 
-enum CLIENT_STATE
+enum CLIENT_NETWORK_STATE
 {
 	RUNNING,
 	CLOSING,
 	DISCONN
 };
 
+enum CLIENT_LOGIN_STATE
+{
+	LOGIN_PASS = 1 << 0,
+	LOGIN_NICK = 1 << 1,
+	LOGIN_USER = 1 << 2,
+	LOGIN_REGS = 1 << 3
+};
+
 class Client : public Socket
 {
 	private:
-		std::string		_writeBuffer;
-		std::string		_readBuffer;
-		std::string		_ipAddress;
-		CLIENT_STATE	_state;
+		std::string				_writeBuffer;
+		std::string				_readBuffer;
+		std::string				_ipAddress;
+		std::string				_nickName;
+		std::string				_userName;
+		std::string				_realName;
+		std::string				_cpassword;
+		CLIENT_NETWORK_STATE	_networkState;
+		int						_loginState;
+		std::vector<Channel*>	_channels;
 	public:
 		Client(fd_t fd);
-		void				setIPAddress(const std::string &);
-		const std::string	&getIPAddress(void) const;
-		std::string			&getReadBuffer(void);
-		std::string			&getWriteBuffer(void);
-		void				updatePollEvents(void);
-		void				queueWrite(std::string);
-		void				setState(CLIENT_STATE);
-		const CLIENT_STATE	&getState(void) const;
+		void						setIPAddress(const std::string &);
+		const std::string			&getIPAddress(void) const;
+		std::string					&getReadBuffer(void);
+		std::string					&getWriteBuffer(void);
+		void						updatePollEvents(void);
+		void						queueWrite(std::string);
+		void						setNetworkState(CLIENT_NETWORK_STATE);
+		const CLIENT_NETWORK_STATE	&getNetworkState(void) const;
+		const std::string			getNick(void) const;
+		const std::string			getPrefix(void) const;
+		const std::string			getUser(void) const;
+		const std::string			getRealName(void) const;
+		const std::string			getPassword(void) const;
+		const std::vector<Channel*>	&getChannels(void) const;
+		void						addChannel(Channel *);
+		void						rmvChannel(Channel *);
+		void						setPassword(const std::string &);
+		void						setRealName(const std::string &);
+		void						setUser(const std::string &);
+		void						setNick(const std::string &);
+		void						addLoginState(int);
+		void						rmvLoginState(int);
+		int							getLoginState(void) const;
+		bool						hasLoginState(int) const;
 		~Client();
 };
 
