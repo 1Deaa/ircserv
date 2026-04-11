@@ -20,6 +20,7 @@
 # define ERR_PASSWDMISMATCH(serverName, nickName) (":" + serverName + " 464 " + nickName + " :Password incorrect")
 # define ERR_NOTREGISTERED(serverName, nickName) (":" + serverName + " 451 " + nickName + " :You have not registered")
 # define ERR_ERRONEUSNICKNAME(serverName, nickName, tryName) (":" + serverName + " 432 " + nickName + " " + tryName + " :Erroneous nickname")
+# define ERR_INVALIDUSERNAME(serverName, nickName, tryName) (":" + serverName + " 468 " + nickName + " " + tryName + " :Invalid username")
 # define ERR_NICKNAMEINUSE(serverName, nickName, tryName) (":" + serverName + " 433 " + nickName + " " + tryName + " :Nickname is already in use")
 # define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) (":" + serverName + " 403 " + nickName + " " + channelName + " :No such channel")
 # define ERR_TOOMANYCHANNELS(serverName, nickName, channelName) (":" + serverName + " 405 " + nickName + " " + channelName + " :You have joined too many channels")
