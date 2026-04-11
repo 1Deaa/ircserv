@@ -58,6 +58,26 @@ void	Server::handlePass(Client *client, const Command &cmd)
 	tryRegister(client);
 }
 
+static bool isValidUser(const std::string &user)
+{
+	if (user.empty() || user.length() > 12)
+		return (false);
+
+	// Username must not start with a space or special character
+	if (!std::isalnum(user[0]) && user[0] != '_' && user[0] != '-')
+		return (false);
+
+	for (size_t i = 0; i < user.size(); i++)
+	{
+		if (!std::isalnum(user[i]) &&
+			user[i] != '_' &&
+			user[i] != '-' &&
+			user[i] != '.')
+			return (false);
+	}
+	return (true);
+}
+
 static bool	isValidNick(const std::string &nick)
 {
 	if (nick.empty() || nick.length() > 9)
@@ -131,8 +151,14 @@ void	Server::handleUser(Client *client, const Command &cmd)
 		return ;
 	}
 
-	std::string	username = cmd.getParams()[0]; // TODO: validate username length
+	std::string	username = cmd.getParams()[0];
 	std::string	realname = cmd.getTrailing();
+	if (!isValidUser(username))
+	{
+		client->queueWrite(ERR_INVALIDUSERNAME(_serverName, client->getNick(), username));
+		printClientLog(client, ERRLOG, "entered an erroneous username.");
+		return ;
+	}
 
 	client->setUser(username);
 	client->setRealName(realname);
