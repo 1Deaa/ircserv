@@ -2,7 +2,7 @@ _This project has been created as part of the 42 curriculum by ahirzall, drahwan
 
 ## Description
 
-**ft_irc** is an implementation of a minimal **Internet Relay Chat (IRC) server** in **C++98**, developed as a 42 School project. The program listens on a TCP port, accepts multiple concurrent clients, and exchanges messages according to common IRC client expectations so that a **reference IRC client** (for example **irssi** or **WeeChat**) can connect, register, join channels, and use the required operator features.
+**ft_irc** is an implementation of a minimal **Internet Relay Chat (IRC) server** in **C++98**, developed as a 42 School project. The program listens on a TCP port, accepts multiple concurrent clients, and exchanges messages according to common IRC client expectations so that a **reference IRC client** (for example **HexChat**) can connect, register, join channels, and use the required operator features.
 
 The goal is to understand **event-driven network programming**: non-blocking sockets, a single **I/O multiplexing** call for all file descriptors, and **line-based protocol parsing** (including **fragmented reads**), without forking and without linking server-to-server.
 
@@ -17,6 +17,12 @@ This repository contains **only the server**; it does not implement an IRC clien
 - Standard development tools: `make`.
 
 The project uses **POSIX** sockets (`socket`, `bind`, `listen`, `accept`, `recv`, `send`, `fcntl`, `poll`, etc.). It is **not** built as a native Windows executable.
+
+### Installation
+
+```bash
+git clone git@vogsphere.42amman.com:vogsphere/intra-uuid-ac50f5a6-0845-4bbc-90b0-4568942cfaaa-7291309-ahirzall ircserv
+```
 
 ### Compilation
 
@@ -101,11 +107,11 @@ Official project specification:
 
 We used AI tools as **research and documentation helpers**, not as a substitute for reading the subject or understanding our own code.
 
-| Area | How AI helped |
-| ---- | ------------- |
+| Area                                    | How AI helped                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Gathering resources and information** | Finding and sorting useful material (RFCs, socket/`poll` guides, IRC client behaviour) and suggesting **clear examples** of protocol flows—e.g. registration order, what a numeric reply means, or how a reference client typically talks to a server. We still **verified** everything against `en.subject.pdf` and our tests. |
-| **Markdown and this README** | Improving **structure, wording, and Markdown formatting** (headings, lists, tables) so the README stays readable and matches what 42 asks for. |
-| **Commands, edge cases, and examples** | Drafting **shell examples** (build, run, `nc -C`, Valgrind), **multi-client** test ideas, and reminders about **edge cases** (partial lines, CRLF, wrong `PASS`, channel modes). We ran the commands ourselves and adjusted when something did not match our environment. |
+| **Markdown and this README**            | Improving **structure, wording, and Markdown formatting** (headings, lists, tables) so the README stays readable and matches what 42 asks for.                                                                                                                                                                                  |
+| **Commands, edge cases, and examples**  | Drafting **shell examples** (build, run, `nc -C`, Valgrind), **multi-client** test ideas, and reminders about **edge cases** (partial lines, CRLF, wrong `PASS`, channel modes). We ran the commands ourselves and adjusted when something did not match our environment.                                                       |
 
 The implementation in `src/` was written and debugged by the team; where AI suggested a fact or a command sequence, we **checked it** before relying on it.
 
