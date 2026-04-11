@@ -96,6 +96,7 @@ Classic references for IRC and network programming:
 - [RFC 1459](https://www.rfc-editor.org/rfc/rfc1459) — _Internet Relay Chat Protocol_ (historical baseline).
 - [RFC 2812](https://www.rfc-editor.org/rfc/rfc2812) — _Internet Relay Chat: Client Protocol_ (later client command documentation; useful for cross-checking behavior).
 - [RFC 2813](https://www.rfc-editor.org/rfc/rfc2813) — _Internet Relay Chat: Server Protocol_ (background only; this project does **not** implement server linking).
+- [IRC Numerics List (irc2)](https://www.alien.net.au/irc/irc2numerics.html) — reference for **numeric replies** (RPL/ERR codes) when implementing or cross-checking server responses.
 - `man 2 poll`, `man 2 socket`, `man 2 send`, `man 2 recv`, `man 2 fcntl` — POSIX manual pages on your system.
 - [Beej’s Guide to Network Programming](https://beej.us/guide/bgnet/) — practical introduction to TCP/IP sockets on Unix-like systems.
 
